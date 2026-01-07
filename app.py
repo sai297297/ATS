@@ -11,7 +11,7 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Replace with your actual Gemini API Key
-client = genai.Client(api_key="AIzaSyCwcodkWWw6YAaHIlljPO8Vgn4THxl9r2k")
+client = genai.Client(api_key="")
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -146,4 +146,5 @@ def analyze():
 # RUN
 # ==============================
 if __name__ == "__main__":
+
     app.run(debug=True, port=8080)
