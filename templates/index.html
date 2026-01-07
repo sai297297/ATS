@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXAS ATS | AI Resume Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0a0a0c; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="text-slate-200 selection:bg-indigo-500/30">
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-900/20 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 blur-[120px] rounded-full"></div>
+    </div>
+
+    <header class="border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-indigo-600 p-1.5 rounded-lg shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="cpu" class="text-white w-5 h-5"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-white italic">NEXAS <span class="font-light text-slate-400 not-italic">ATS</span></span>
+            </div>
+            <button class="bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-1.5 rounded-full text-sm transition-all">v2.5 Flash Engine</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="flex flex-col lg:flex-row gap-10">
+            <div class="flex-1 space-y-8">
+                <div class="space-y-2">
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight">Intelligence for Recruitment.</h1>
+                    <p class="text-slate-400 text-lg">Powered by Google Gemini 2.5 Flash.</p>
+                </div>
+
+                <div class="grid gap-8">
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> Resume (PDF)
+                        </label>
+                        <div class="relative group border-2 border-dashed rounded-2xl p-10 transition-all duration-300 flex flex-col items-center justify-center gap-4 bg-white/[0.02] border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/[0.02]">
+                            <input type="file" id="resume-input" accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div class="bg-white/5 p-4 rounded-full group-hover:scale-110 transition-transform">
+                                <i data-lucide="upload" id="upload-icon" class="text-indigo-400 w-8 h-8"></i>
+                            </div>
+                            <div class="text-center">
+                                <p id="file-name" class="text-white font-medium">Click or drag your resume here</p>
+                                <p class="text-slate-500 text-sm mt-1">PDF Files only</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                            <i data-lucide="briefcase" class="w-4 h-4"></i> Job Description
+                        </label>
+                        <textarea id="jd-input" 
+                            class="w-full h-64 bg-white/[0.02] border border-white/10 rounded-2xl p-5 text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
+                            placeholder="Paste the job description requirements here..."></textarea>
+                    </div>
+
+                    <button id="analyze-btn" 
+                        class="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        <span>Run Match Engine</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-[450px]">
+                <div id="results-card" class="sticky top-24 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden transition-all duration-700 opacity-60 translate-y-4">
+                    <div class="bg-indigo-600/10 p-6 border-b border-white/10">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i data-lucide="bar-chart-3" class="text-indigo-400 w-5 h-5"></i> Analysis Report
+                            </h2>
+                            <span id="live-tag" class="hidden bg-indigo-500 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded text-white">Gemini Live</span>
+                        </div>
+                        <div class="flex flex-col items-center py-4">
+                            <div class="relative w-36 h-36 flex items-center justify-center">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="72" cy="72" r="66" stroke="currentColor" stroke-width="8" fill="transparent" class="text-white/5" />
+                                    <circle id="score-circle" cx="72" cy="72" r="66" stroke="currentColor" stroke-width="8" fill="transparent" 
+                                        stroke-dasharray="414.69" stroke-dashoffset="414.69" class="text-indigo-500 transition-all duration-[1500ms]" />
+                                </svg>
+                                <span id="score-text" class="absolute text-4xl font-black text-white">--</span>
+                            </div>
+                            <p class="text-indigo-400 font-semibold mt-4 tracking-wide uppercase text-xs">ATS Match Score</p>
+                        </div>
+                    </div>
+
+                    <div id="report-content" class="p-6 space-y-6 max-h-[500px] overflow-y-auto custom-scrollbar">
+                        <div id="empty-state" class="py-12 text-center text-slate-500">
+                            <p>Upload files to start analysis</p>
+                        </div>
+                        <div id="results-data" class="hidden space-y-4">
+                            <div id="raw-output" class="text-xs text-slate-400 font-mono whitespace-pre-wrap leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const resumeInput = document.getElementById('resume-input');
+        const fileNameText = document.getElementById('file-name');
+        const jdInput = document.getElementById('jd-input');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const resultsCard = document.getElementById('results-card');
+        const scoreCircle = document.getElementById('score-circle');
+        const scoreText = document.getElementById('score-text');
+        const emptyState = document.getElementById('empty-state');
+        const resultsData = document.getElementById('results-data');
+        const rawOutput = document.getElementById('raw-output');
+
+        let selectedFile = null;
+
+        resumeInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                fileNameText.textContent = selectedFile.name;
+                document.getElementById('upload-icon').className = "text-green-400 w-8 h-8";
+            }
+        });
+
+        analyzeBtn.addEventListener('click', async () => {
+            const jd = jdInput.value.trim();
+            if (!selectedFile || !jd) {
+                alert("Please select a PDF and provide a Job Description.");
+                return;
+            }
+
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Analyzing...</span>`;
+            lucide.createIcons();
+
+            const formData = new FormData();
+            formData.append('resume', selectedFile);
+            formData.append('job_description', jd);
+
+            try {
+                // Connecting to your exact backend route /analyze
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if(data.error) throw new Error(data.error);
+                
+                renderResults(data);
+            } catch (error) {
+                alert("Error: " + error.message);
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = `<i data-lucide="sparkles" class="w-5 h-5"></i><span>Run Match Engine</span>`;
+                lucide.createIcons();
+            }
+        });
+
+        function renderResults(data) {
+            resultsCard.classList.remove('opacity-60', 'translate-y-4');
+            resultsCard.classList.add('opacity-100', 'translate-y-0');
+            emptyState.classList.add('hidden');
+            resultsData.classList.remove('hidden');
+            document.getElementById('live-tag').classList.remove('hidden');
+
+            // Parse Match Percentage from ats_result string (Regex looks for numbers 0-100)
+            const scoreMatch = data.ats_result.match(/(\d+)%/);
+            const score = scoreMatch ? parseInt(scoreMatch[1]) : 75;
+            
+            const offset = 414.69 - (414.69 * (score / 100));
+            scoreCircle.style.strokeDashoffset = offset;
+            scoreText.textContent = `${score}%`;
+
+            // Display the structured markdown from Gemini
+            rawOutput.innerHTML = `
+                <div class="mb-4 text-indigo-400 font-bold border-b border-white/10 pb-2">ATS ANALYSIS</div>
+                ${data.ats_result}
+                <div class="my-4 text-indigo-400 font-bold border-b border-white/10 pb-2">PARSED RESUME</div>
+                ${data.parsed_resume}
+            `;
+        }
+    </script>
+</body>
+</html>
